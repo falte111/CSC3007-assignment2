@@ -3,23 +3,15 @@
 
 <!-- Load d3.js -->
 <script src="https://d3js.org/d3.v4.js"></script>
-<script>
-  // const userAction = async () => {
-  //   const response = await fetch(
-  //     "https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19-4b54-ab6b-d999c251edcf"
-  //   );
-  //   const govJsonCrime = await response.json(); //extract JSON from the http response
-  //   // do something with myJson
-  //   const records = govJsonCrime.result.records;
-  // };
-  // userAction();
-</script>
-<div id="dataviz_builtWithD3">
-  <h1>Select to view each specific year</h1>
-</div>
+<body>
+  <div id="dataviz_builtWithD3">
+    <h1>Select to view each specific year</h1>
+  </div>
 
-<!-- Create a div where the graph will take place -->
-<div id="my_dataviz"></div>
+  <!-- Create a div where the graph will take place -->
+
+  <div id="my_dataviz"></div>
+</body>
 <script>
   // Create data = list of groups
   var allGroup = [
@@ -49,19 +41,6 @@
       return d;
     }); // corresponding value returned by the button
 
-  // create 2 data_set
-  var data1 = [
-    { group: "A", value: 4 },
-    { group: "B", value: 16 },
-    { group: "C", value: 8 },
-  ];
-
-  var data2 = [
-    { group: "A", value: 7 },
-    { group: "B", value: 1 },
-    { group: "C", value: 20 },
-    { group: "D", value: 10 },
-  ];
   const userAction = async () => {
     const response = await fetch(
       "https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19-4b54-ab6b-d999c251edcf"
@@ -121,18 +100,34 @@
       y.domain([0, maxy]);
       yAxis.transition().duration(1000).call(d3.axisLeft(y));
 
-      // Create the u variable
+      var div = d3
+        .select("body")
+        .select("#my_dataviz")
+        .append("div")
+        .attr("class", "tooltip-donut")
+        .style("opacity", 0);
+      // Create the rectangle variable
       var rect = svg.selectAll("rect").data(filteredYear);
       rect
         .enter()
         .append("rect") // Add a new rect for each new elements
         // Must do the mouseover before the .merge as you need to apply the mouse over effect before merging with the new rectangles
         //Must do after the .append
+
+        //Adding hover mouse effects
         .on("mouseover", function (d, i) {
           d3.select(this).transition().duration("50").attr("opacity", ".85");
+          //Makes the new div appear on hover:
+          div.transition().duration(50).style("opacity", 1);
+          div
+            .html(d.value)
+            .style("left", d3.event.pageX + 10 + "px")
+            .style("top", d3.event.pageY - 15 + "px");
         })
         .on("mouseout", function (d, i) {
           d3.select(this).transition().duration("50").attr("opacity", "1");
+          //Makes the new div disappear:
+          div.transition().duration("50").style("opacity", 0);
         })
         .merge(rect) // get the already existing elements as well
         .transition() // and apply changes to all of them
